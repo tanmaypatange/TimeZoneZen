@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, ChevronRight, Settings2 } from 'lucide-react';
+import { DateTime } from 'luxon';
 
 const TimeZoneConverter = () => {
   const [showMultipleTimezones, setShowMultipleTimezones] = useState(false);
@@ -26,22 +27,30 @@ const TimeZoneConverter = () => {
   const handleUseCurrentTime = () => {
     const now = new Date();
     
-    // Set current time
+    // Set current time in HH:MM format
     setTime(now.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true 
     }));
     
-    // Set current date - ensure this is set in the correct format for the date input
-    setDate(now.toISOString().split('T')[0]);
+    // Set current date
+    const formattedDate = now.toISOString().split('T')[0];
+    setDate(formattedDate);
     
     // Set AM/PM
     setAmPm(now.getHours() >= 12 ? 'PM' : 'AM');
     
-    // Automatically detect and set user's time zone
+    // Get user's timezone using Intl API
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    // Alternative method using jstz library if needed
+    // const userTimeZone = jstz.determine().name();
+    
     setFromTimezone(userTimeZone);
+    
+    // Log for debugging
+    console.log('Current timezone:', userTimeZone);
   };
 
   // Call handleUseCurrentTime when component mounts
@@ -55,13 +64,20 @@ const TimeZoneConverter = () => {
   };
 
   const handleConvert = () => {
-    // TODO: Implement actual time zone conversion logic using Luxon
-    const mockConvertedTimes = toTimezones.map(zone => ({
-      timezone: zone,
-      time: '9:30 PM',
-      date: 'Wednesday, Oct 23'
-    }));
-    setConvertedTimes(mockConvertedTimes);
+    const now = DateTime.fromFormat(`${time} ${amPm}`, 'hh:mm a').setZone(fromTimezone);
+    
+    const convertedResults = toTimezones.map(zone => {
+      if (!zone) return null;
+      
+      const converted = now.setZone(zone);
+      return {
+        timezone: zone,
+        time: converted.toFormat('hh:mm a'),
+        date: converted.toFormat('cccc, LLL dd')
+      };
+    }).filter(Boolean);
+    
+    setConvertedTimes(convertedResults);
   };
 
   return (
