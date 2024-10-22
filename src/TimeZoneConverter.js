@@ -44,6 +44,12 @@ const TimeZoneConverter = () => {
     const firstToTimezone = toTimezones[0];
     setToTimezones([fromTimezone, ...toTimezones.slice(1)]);
     setFromTimezone(firstToTimezone);
+    
+    // Update time and date based on the swapped timezone
+    const now = DateTime.now().setZone(firstToTimezone);
+    setTime(now.toFormat('hh:mm'));
+    setDate(now.toFormat('yyyy-MM-dd'));
+    setAmPm(now.hour >= 12 ? 'PM' : 'AM');
   };
 
   const handleUseCurrentTime = async () => {
