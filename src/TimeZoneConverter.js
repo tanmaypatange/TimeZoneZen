@@ -2,7 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { Clock, RotateCcw, Settings2 } from 'lucide-react';
 import { DateTime } from 'luxon';
 
-// Rest of the imports and component code remains the same until the handleConvert function
+const timeZoneOptions = [
+  { value: 'Asia/Kolkata', label: 'India (GMT+5:30) [Asia/Kolkata]' },
+  { value: 'America/New_York', label: 'New York (GMT-4) [America/New_York]' },
+  { value: 'Europe/London', label: 'London (GMT+1) [Europe/London]' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (GMT+9) [Asia/Tokyo]' },
+  { value: 'Asia/Dubai', label: 'Dubai (GMT+4) [Asia/Dubai]' },
+  { value: 'Asia/Shanghai', label: 'Shanghai (GMT+8) [Asia/Shanghai]' },
+  { value: 'Europe/Paris', label: 'Paris (GMT+2) [Europe/Paris]' },
+  { value: 'Australia/Sydney', label: 'Sydney (GMT+11) [Australia/Sydney]' },
+  { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-7) [America/Los_Angeles]' },
+  { value: 'Asia/Singapore', label: 'Singapore (GMT+8) [Asia/Singapore]' },
+  { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' },
+  { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
+  { value: 'Asia/Seoul', label: 'Seoul (GMT+9) [Asia/Seoul]' },
+  { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
+  { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' },
+  { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
+  { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
+  { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
+  { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
+  { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
+  { value: 'Europe/Vienna', label: 'Vienna (GMT+2) [Europe/Vienna]' },
+  { value: 'Europe/Brussels', label: 'Brussels (GMT+2) [Europe/Brussels]' },
+  { value: 'America/Sao_Paulo', label: 'São Paulo (GMT-3) [America/Sao_Paulo]' },
+  { value: 'America/Mexico_City', label: 'Mexico City (GMT-5) [America/Mexico_City]' },
+  { value: 'Africa/Cairo', label: 'Cairo (GMT+2) [Africa/Cairo]' },
+  { value: 'Asia/Jakarta', label: 'Jakarta (GMT+7) [Asia/Jakarta]' },
+  { value: 'Pacific/Auckland', label: 'Auckland (GMT+13) [Pacific/Auckland]' },
+  { value: 'Asia/Manila', label: 'Manila (GMT+8) [Asia/Manila]' },
+  { value: 'Asia/Dhaka', label: 'Dhaka (GMT+6) [Asia/Dhaka]' },
+  { value: 'Asia/Tehran', label: 'Tehran (GMT+3:30) [Asia/Tehran]' }
+].sort((a, b) => a.label.localeCompare(b.label));
 
 const TimeZoneConverter = () => {
   const [showMultipleTimezones, setShowMultipleTimezones] = useState(false);
@@ -12,8 +43,6 @@ const TimeZoneConverter = () => {
   const [fromTimezone, setFromTimezone] = useState('');
   const [toTimezones, setToTimezones] = useState(['']);
   const [convertedTimes, setConvertedTimes] = useState([]);
-
-  // ... timeZoneOptions array remains the same ...
 
   const handleSwap = () => {
     const firstToTimezone = toTimezones[0];
