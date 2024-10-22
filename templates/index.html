@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,17 +13,27 @@
         <h1 class="text-center mb-4">Time Zone Converter</h1>
         <div class="timezone-converter card">
             <div class="card-body">
+                <h2>Convert Time</h2>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="fromTime">Time:</label>
-                            <input type="time" id="fromTime" class="form-control" required>
+                            <div class="input-group">
+                                <input type="time" id="fromTime" class="form-control" required>
+                                <select id="amPmToggle" class="form-select">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="fromDate">Date:</label>
-                            <input type="date" id="fromDate" class="form-control" required>
+                            <div class="input-group">
+                                <input type="date" id="fromDate" class="form-control" required>
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -46,18 +56,13 @@
                         <option value="">Select a time zone</option>
                     </select>
                 </div>
-                <div class="mt-4">
-                    <h3>Converted Time:</h3>
-                    <p id="convertedTime" class="alert alert-info"></p>
-                    <p id="error" class="alert alert-danger d-none"></p>
+                <div class="text-end">
+                    <a href="#" id="addMoreZones" class="text-primary">Add More Zones</a>
                 </div>
-                <div class="progress mt-3">
-                    <div id="conversionProgress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                <div id="convertedTimeResults" class="mt-4">
+                    <!-- Converted time results will be dynamically added here -->
                 </div>
-                <div class="mt-3">
-                    <p>Level: <span id="userLevel">1</span></p>
-                    <p>Conversions: <span id="conversionCount">0</span></p>
-                </div>
+                <p id="error" class="alert alert-danger d-none"></p>
             </div>
         </div>
     </div>

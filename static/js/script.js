@@ -3,19 +3,14 @@ const DateTime = luxon.DateTime;
 
 // DOM elements
 const fromTimeInput = document.getElementById('fromTime');
+const amPmToggle = document.getElementById('amPmToggle');
 const fromDateInput = document.getElementById('fromDate');
 const fromTimezoneSelect = document.getElementById('fromTimezone');
 const toTimezoneSelect = document.getElementById('toTimezone');
-const convertedTimeDisplay = document.getElementById('convertedTime');
+const convertedTimeResults = document.getElementById('convertedTimeResults');
 const errorDisplay = document.getElementById('error');
 const useCurrentTimeBtn = document.getElementById('useCurrentTime');
-const conversionProgressBar = document.getElementById('conversionProgress');
-const userLevelDisplay = document.getElementById('userLevel');
-const conversionCountDisplay = document.getElementById('conversionCount');
-
-// Game state
-let conversionCount = 0;
-let userLevel = 1;
+const addMoreZonesBtn = document.getElementById('addMoreZones');
 
 // Populate timezone dropdowns
 fetch('/timezones')
@@ -34,6 +29,7 @@ function setCurrentDateTime() {
   const now = DateTime.now();
   fromTimeInput.value = now.toFormat('HH:mm');
   fromDateInput.value = now.toFormat('yyyy-MM-dd');
+  amPmToggle.value = now.hour >= 12 ? 'PM' : 'AM';
   
   // Try to set the local timezone
   const localTimezone = now.zoneName;
@@ -52,96 +48,87 @@ function convertTime() {
   const fromTime = fromTimeInput.value;
   const fromDate = fromDateInput.value;
   const fromTimezone = fromTimezoneSelect.value;
-  const toTimezone = toTimezoneSelect.value;
+  const toTimezones = Array.from(document.querySelectorAll('.to-timezone-select')).map(select => select.value);
 
-  if (!fromTime || !fromDate || !fromTimezone || !toTimezone) {
+  if (!fromTime || !fromDate || !fromTimezone || toTimezones.length === 0) {
     showError('Please fill in all fields.');
     return;
   }
 
   const dateTimeStr = `${fromDate} ${fromTime}`;
-  const url = `/convert/${encodeURIComponent(fromTimezone)}/${encodeURIComponent(toTimezone)}/${encodeURIComponent(dateTimeStr)}`;
+  
+  toTimezones.forEach(toTimezone => {
+    const url = `/convert/${encodeURIComponent(fromTimezone)}/${encodeURIComponent(toTimezone)}/${encodeURIComponent(dateTimeStr)}`;
 
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      const result = `${data.converted_time} ${data.abbreviation} (UTC${data.offset})`;
-      showConvertedTime(result);
-      updateGameState();
-    })
-    .catch(error => {
-      showError(`Error: ${error.message}`);
-    });
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        showConvertedTime(toTimezone, data);
+      })
+      .catch(error => {
+        showError(`Error: ${error.message}`);
+      });
+  });
 }
 
-function showConvertedTime(result) {
-  convertedTimeDisplay.textContent = result;
-  convertedTimeDisplay.classList.add('fade-in');
+function showConvertedTime(toTimezone, data) {
+  const resultHtml = `
+    <div class="converted-time-result">
+      <h3>${toTimezone} (GMT${data.offset})</h3>
+      <div class="time">${data.converted_time}</div>
+      <div class="date">${DateTime.fromISO(data.converted_time).toFormat('cccc, LLL dd')}</div>
+      <button class="copy-btn" data-time="${data.converted_time}">
+        <i class="fas fa-copy"></i> Copy
+      </button>
+    </div>
+  `;
+  convertedTimeResults.insertAdjacentHTML('beforeend', resultHtml);
   errorDisplay.classList.add('d-none');
-  setTimeout(() => convertedTimeDisplay.classList.remove('fade-in'), 500);
 }
 
 function showError(message) {
   errorDisplay.textContent = message;
   errorDisplay.classList.remove('d-none');
-  errorDisplay.classList.add('slide-in');
-  convertedTimeDisplay.textContent = '';
-  setTimeout(() => errorDisplay.classList.remove('slide-in'), 500);
-}
-
-function updateGameState() {
-  conversionCount++;
-  conversionCountDisplay.textContent = conversionCount;
-  
-  const progress = (conversionCount % 10) * 10;
-  conversionProgressBar.style.width = `${progress}%`;
-  conversionProgressBar.setAttribute('aria-valuenow', progress);
-  conversionProgressBar.textContent = `${progress}%`;
-
-  if (conversionCount % 10 === 0) {
-    userLevel++;
-    userLevelDisplay.textContent = userLevel;
-    userLevelDisplay.classList.add('fade-in');
-    setTimeout(() => userLevelDisplay.classList.remove('fade-in'), 500);
-  }
+  convertedTimeResults.innerHTML = '';
 }
 
 // Event listeners
 fromTimeInput.addEventListener('change', convertTime);
+amPmToggle.addEventListener('change', convertTime);
 fromDateInput.addEventListener('change', convertTime);
 fromTimezoneSelect.addEventListener('change', convertTime);
 toTimezoneSelect.addEventListener('change', convertTime);
 
+// Add More Zones functionality
+addMoreZonesBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  const newSelect = toTimezoneSelect.cloneNode(true);
+  newSelect.classList.add('to-timezone-select');
+  newSelect.addEventListener('change', convertTime);
+  toTimezoneSelect.parentNode.insertBefore(newSelect, addMoreZonesBtn.parentNode);
+});
+
+// Copy functionality
+convertedTimeResults.addEventListener('click', (e) => {
+  if (e.target.classList.contains('copy-btn') || e.target.parentElement.classList.contains('copy-btn')) {
+    const btn = e.target.classList.contains('copy-btn') ? e.target : e.target.parentElement;
+    const time = btn.dataset.time;
+    navigator.clipboard.writeText(time).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      }, 2000);
+    });
+  }
+});
+
 // Initial conversion
 convertTime();
-
-// Autocomplete for timezone dropdowns
-function setupAutocomplete(selectElement) {
-  const datalist = document.createElement('datalist');
-  datalist.id = `${selectElement.id}-list`;
-  selectElement.insertAdjacentElement('afterend', datalist);
-
-  selectElement.setAttribute('list', datalist.id);
-
-  selectElement.addEventListener('input', function() {
-    const value = this.value.toLowerCase();
-    const options = Array.from(this.options).filter(option => 
-      option.text.toLowerCase().includes(value)
-    );
-
-    datalist.innerHTML = options.map(option => 
-      `<option value="${option.value}">${option.text}</option>`
-    ).join('');
-  });
-}
-
-setupAutocomplete(fromTimezoneSelect);
-setupAutocomplete(toTimezoneSelect);
