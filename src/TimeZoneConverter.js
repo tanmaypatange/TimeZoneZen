@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, RotateCcw, Settings2, Sun, Moon, Star, Trash2 } from 'lucide-react';
+import { Clock, ArrowLeftRight, Settings2, Sun, Moon, Star, Trash2 } from 'lucide-react';
 import { DateTime } from 'luxon';
 
 const timeZoneOptions = [
@@ -17,7 +17,22 @@ const timeZoneOptions = [
   { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
   { value: 'Asia/Seoul', label: 'Seoul (GMT+9) [Asia/Seoul]' },
   { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
-  { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' }
+  { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' },
+  { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
+  { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
+  { value: 'America/Mexico_City', label: 'Mexico City (GMT-5) [America/Mexico_City]' },
+  { value: 'America/Sao_Paulo', label: 'São Paulo (GMT-3) [America/Sao_Paulo]' },
+  { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
+  { value: 'Europe/Rome', label: 'Rome (GMT+2) [Europe/Rome]' },
+  { value: 'Europe/Madrid', label: 'Madrid (GMT+2) [Europe/Madrid]' },
+  { value: 'Europe/Stockholm', label: 'Stockholm (GMT+2) [Europe/Stockholm]' },
+  { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
+  { value: 'Asia/Jakarta', label: 'Jakarta (GMT+7) [Asia/Jakarta]' },
+  { value: 'Asia/Manila', label: 'Manila (GMT+8) [Asia/Manila]' },
+  { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
+  { value: 'Pacific/Auckland', label: 'Auckland (GMT+13) [Pacific/Auckland]' },
+  { value: 'Africa/Cairo', label: 'Cairo (GMT+2) [Africa/Cairo]' },
+  { value: 'Africa/Johannesburg', label: 'Johannesburg (GMT+2) [Africa/Johannesburg]' }
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 const TimeZoneConverter = ({ theme, onThemeToggle }) => {
@@ -38,7 +53,6 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   };
 
   useEffect(() => {
-    // Load saved pairs from localStorage
     const loadedPairs = localStorage.getItem('savedTimezones');
     if (loadedPairs) {
       setSavedPairs(JSON.parse(loadedPairs));
@@ -87,7 +101,6 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   };
 
   const savePair = (fromZone, toZone) => {
-    // Check for duplicates
     const isDuplicate = savedPairs.some(pair => 
       pair.from === fromZone && pair.to === toZone
     );
@@ -286,7 +299,7 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
               onClick={handleSwap}
               title="Swap time zones"
             >
-              <RotateCcw className="w-6 h-6" />
+              <ArrowLeftRight className="w-6 h-6" />
             </button>
           </div>
 
@@ -369,7 +382,6 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
         </div>
       </div>
 
-      {/* Toast Notification */}
       {toast.show && (
         <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
           <div className={`toast show bg-${toast.type === 'success' ? 'success' : 'warning'} text-white`}>
