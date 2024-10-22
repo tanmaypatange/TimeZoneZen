@@ -1,0 +1,88 @@
+# Time Zone Converter - Technical Requirements Specification
+
+## Overview
+A single-page web application that allows users to convert times between different time zones with support for date changes and current time functionality.
+
+## Core Features
+
+### 1. Time Input Section
+- Time input field (HH:MM format)
+- AM/PM toggle switch
+- Date picker (YYYY-MM-DD format)
+- "Use Current Time" button
+  - When clicked, automatically populates all fields with user's system time/date
+- Input validation for time format
+
+### 2. Time Zone Selection
+#### Source Time Zone ("From")
+- Searchable dropdown menu containing all major world cities and their time zones
+- Option to group cities by continent/region
+- Recent selections should appear at the top
+- Display GMT/UTC offset next to each city
+
+#### Target Time Zone ("To")
+- Same functionality as source time zone
+- Allow multiple target time zones (up to 5) to be selected simultaneously
+- Display converted time for all selected target zones
+
+### 3. Results Display
+- Show converted time and date for each selected target time zone
+- Clearly indicate date changes (+1 day or -1 day) when applicable
+- Display local time zone abbreviation (EST, PST, etc.)
+- Show GMT/UTC offset for reference
+
+### 4. Additional Features
+- Real-time conversion (updates as user types/selects)
+- Swap button to reverse source and target time zones
+- Save frequently used city pairs
+- Support for daylight saving time transitions
+- Clear all button to reset the form
+
+## Technical Requirements
+
+### Time Zone Database
+- Use the IANA Time Zone Database (tzdata)
+- Include major cities worldwide (minimum 500 cities)
+- Regular updates for time zone changes and DST rules
+
+### User Interface
+- Clean, modern design
+- Mobile-responsive layout
+- Dark/light mode support
+- Accessibility compliance (WCAG 2.1)
+
+### Performance
+- Load time under 2 seconds
+- Instant conversion calculations
+- Smooth dropdown search performance with large city database
+
+### Data Persistence
+- Store recent selections in browser's local storage
+- Remember user's preferences
+
+### Error Handling
+- Clear error messages for invalid inputs
+- Graceful handling of edge cases (invalid dates, DST transitions)
+- Fallback for unavailable system time
+
+## Example User Flow
+1. User lands on page
+2. Clicks "Use Current Time" button
+3. System populates current time/date based on user's device
+4. User selects source city from dropdown
+5. User selects one or more target cities
+6. Converted times display instantly
+7. User can modify time/date/cities as needed
+
+## Technical Stack Recommendations
+- Frontend: React/Vue.js for dynamic updates
+- Time Zone Library: Moment.js with timezone data or Luxon
+- City Database: JSON file with regular updates
+- Styling: CSS framework of choice (Bootstrap/Tailwind)
+
+## Notes for Implementation
+- Ensure all time calculations happen in UTC to avoid errors
+- Implement proper error boundaries
+- Consider adding a "Copy to Clipboard" feature for converted times
+- Include loading states for dropdowns and conversions
+- Consider adding URL parameters for sharing specific conversions
