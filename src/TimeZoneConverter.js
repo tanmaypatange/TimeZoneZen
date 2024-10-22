@@ -24,36 +24,31 @@ const TimeZoneConverter = () => {
     { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' }
   ];
 
-  const handleUseCurrentTime = () => {
-    const now = new Date();
-    
-    // Set current time in HH:MM format
-    setTime(now.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    }));
-    
-    // Set current date
-    const formattedDate = now.toISOString().split('T')[0];
-    setDate(formattedDate);
-    
-    // Set AM/PM
-    setAmPm(now.getHours() >= 12 ? 'PM' : 'AM');
-    
-    // Get user's timezone using Intl API
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
-    // Alternative method using jstz library if needed
-    // const userTimeZone = jstz.determine().name();
-    
-    setFromTimezone(userTimeZone);
-    
-    // Log for debugging
-    console.log('Current timezone:', userTimeZone);
+  const handleUseCurrentTime = async () => {
+    try {
+      // Fetch timezone from IP
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      const userTimeZone = data.timezone;
+      
+      // Set current time and date based on the fetched timezone
+      const now = DateTime.now().setZone(userTimeZone);
+      
+      // Update the form fields
+      setTime(now.toFormat('hh:mm'));
+      setDate(now.toFormat('yyyy-MM-dd'));
+      setAmPm(now.hour >= 12 ? 'PM' : 'AM');
+      setFromTimezone(userTimeZone);
+      
+      console.log('IP-based timezone:', userTimeZone);
+    } catch (error) {
+      console.error('Error fetching timezone:', error);
+      // Fallback to browser's timezone if IP geolocation fails
+      const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      setFromTimezone(browserTimeZone);
+    }
   };
 
-  // Call handleUseCurrentTime when component mounts
   useEffect(() => {
     handleUseCurrentTime();
   }, []);
@@ -190,7 +185,14 @@ const TimeZoneConverter = () => {
                       <p className="h4 mb-1">{result.time}</p>
                       <p className="text-muted small mb-0">{result.date}</p>
                     </div>
-                    <button className="btn btn-link">Copy</button>
+                    <button 
+                      className="btn btn-link"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${result.time} ${result.date}`);
+                      }}
+                    >
+                      Copy
+                    </button>
                   </div>
                 </div>
               </div>
