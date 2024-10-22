@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, RotateCcw, Settings2 } from 'lucide-react';
+import { Clock, RotateCcw, Settings2, Sun, Moon } from 'lucide-react';
 import { DateTime } from 'luxon';
 
 const timeZoneOptions = [
@@ -20,7 +20,7 @@ const timeZoneOptions = [
   { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' }
 ].sort((a, b) => a.label.localeCompare(b.label));
 
-const TimeZoneConverter = () => {
+const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   const [showMultipleTimezones, setShowMultipleTimezones] = useState(false);
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
@@ -33,7 +33,6 @@ const TimeZoneConverter = () => {
     const selectedTimezone = e.target.value;
     setFromTimezone(selectedTimezone);
     
-    // Update time and date based on the selected timezone
     const now = DateTime.now().setZone(selectedTimezone);
     setTime(now.toFormat('hh:mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
@@ -45,7 +44,6 @@ const TimeZoneConverter = () => {
     setToTimezones([fromTimezone, ...toTimezones.slice(1)]);
     setFromTimezone(firstToTimezone);
     
-    // Update time and date based on the swapped timezone
     const now = DateTime.now().setZone(firstToTimezone);
     setTime(now.toFormat('hh:mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
@@ -54,12 +52,10 @@ const TimeZoneConverter = () => {
 
   const handleUseCurrentTime = async () => {
     try {
-      // Fetch timezone from IP
       const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
       const userTimeZone = data.timezone;
       
-      // Set current time and date based on the fetched timezone
       const now = DateTime.now().setZone(userTimeZone);
       setTime(now.toFormat('hh:mm'));
       setDate(now.toFormat('yyyy-MM-dd'));
@@ -69,7 +65,6 @@ const TimeZoneConverter = () => {
       console.log('IP-based timezone:', userTimeZone);
     } catch (error) {
       console.error('Error fetching timezone:', error);
-      // Fallback to browser's timezone if IP geolocation fails
       const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       setFromTimezone(browserTimeZone);
     }
@@ -115,9 +110,18 @@ const TimeZoneConverter = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h2">Time Zone Converter</h1>
-        <button className="btn btn-outline-secondary rounded-circle">
-          <Settings2 className="w-5 h-5" />
-        </button>
+        <div className="d-flex gap-2">
+          <button 
+            className="btn btn-outline-secondary rounded-circle"
+            onClick={onThemeToggle}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </button>
+          <button className="btn btn-outline-secondary rounded-circle">
+            <Settings2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -229,7 +233,7 @@ const TimeZoneConverter = () => {
           </div>
 
           {convertedTimes.map((result, index) => (
-            <div key={index} className="card bg-light mb-3">
+            <div key={index} className="card mb-3">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
