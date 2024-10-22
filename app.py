@@ -2,8 +2,12 @@ from flask import Flask, render_template, jsonify
 import pytz
 from datetime import datetime
 from collections import defaultdict
+import logging
 
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/')
 def index():
@@ -30,7 +34,7 @@ def get_timezones():
 def convert_timezone(from_tz, to_tz, datetime_str):
     try:
         # Parse the input datetime string
-        dt = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M %p')
+        dt = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
         
         # Set the source timezone
         from_timezone = pytz.timezone(from_tz)
@@ -49,6 +53,7 @@ def convert_timezone(from_tz, to_tz, datetime_str):
         
         return jsonify(result)
     except Exception as e:
+        app.logger.error(f"Error in convert_timezone: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':

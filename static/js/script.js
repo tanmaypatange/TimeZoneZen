@@ -63,7 +63,12 @@ function convertTime() {
   const url = `/convert/${encodeURIComponent(fromTimezone)}/${encodeURIComponent(toTimezone)}/${encodeURIComponent(dateTimeStr)}`;
 
   fetch(url)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.error) {
         throw new Error(data.error);
