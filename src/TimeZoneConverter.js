@@ -12,26 +12,51 @@ const TimeZoneConverter = () => {
   const [convertedTimes, setConvertedTimes] = useState([]);
 
   const timeZoneOptions = [
+    { value: 'Africa/Cairo', label: 'Cairo (GMT+2) [Africa/Cairo]' },
+    { value: 'Africa/Johannesburg', label: 'Johannesburg (GMT+2) [Africa/Johannesburg]' },
+    { value: 'Africa/Lagos', label: 'Lagos (GMT+1) [Africa/Lagos]' },
+    { value: 'America/Buenos_Aires', label: 'Buenos Aires (GMT-3) [America/Buenos_Aires]' },
     { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' },
-    { value: 'Asia/Dubai', label: 'Dubai (GMT+4) [Asia/Dubai]' },
-    { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
-    { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
-    { value: 'Asia/Kolkata', label: 'India (GMT+5:30) [Asia/Kolkata]' },
+    { value: 'America/Lima', label: 'Lima (GMT-5) [America/Lima]' },
     { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-7) [America/Los_Angeles]' },
-    { value: 'Europe/London', label: 'London (GMT+1) [Europe/London]' },
-    { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
-    { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
+    { value: 'America/Mexico_City', label: 'Mexico City (GMT-5) [America/Mexico_City]' },
     { value: 'America/New_York', label: 'New York (GMT-4) [America/New_York]' },
-    { value: 'Europe/Paris', label: 'Paris (GMT+2) [Europe/Paris]' },
+    { value: 'America/Sao_Paulo', label: 'São Paulo (GMT-3) [America/Sao_Paulo]' },
+    { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
+    { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
+    { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
+    { value: 'Asia/Dhaka', label: 'Dhaka (GMT+6) [Asia/Dhaka]' },
+    { value: 'Asia/Dubai', label: 'Dubai (GMT+4) [Asia/Dubai]' },
+    { value: 'Asia/Ho_Chi_Minh', label: 'Ho Chi Minh City (GMT+7) [Asia/Ho_Chi_Minh]' },
+    { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
+    { value: 'Asia/Jakarta', label: 'Jakarta (GMT+7) [Asia/Jakarta]' },
+    { value: 'Asia/Kolkata', label: 'India (GMT+5:30) [Asia/Kolkata]' },
+    { value: 'Asia/Manila', label: 'Manila (GMT+8) [Asia/Manila]' },
+    { value: 'Asia/Riyadh', label: 'Riyadh (GMT+3) [Asia/Riyadh]' },
     { value: 'Asia/Seoul', label: 'Seoul (GMT+9) [Asia/Seoul]' },
     { value: 'Asia/Shanghai', label: 'Shanghai (GMT+8) [Asia/Shanghai]' },
     { value: 'Asia/Singapore', label: 'Singapore (GMT+8) [Asia/Singapore]' },
-    { value: 'Australia/Sydney', label: 'Sydney (GMT+11) [Australia/Sydney]' },
-    { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
+    { value: 'Asia/Tehran', label: 'Tehran (GMT+3:30) [Asia/Tehran]' },
     { value: 'Asia/Tokyo', label: 'Tokyo (GMT+9) [Asia/Tokyo]' },
-    { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
-    { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
-    { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' }
+    { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
+    { value: 'Australia/Sydney', label: 'Sydney (GMT+11) [Australia/Sydney]' },
+    { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
+    { value: 'Europe/Athens', label: 'Athens (GMT+3) [Europe/Athens]' },
+    { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' },
+    { value: 'Europe/Brussels', label: 'Brussels (GMT+2) [Europe/Brussels]' },
+    { value: 'Europe/Copenhagen', label: 'Copenhagen (GMT+2) [Europe/Copenhagen]' },
+    { value: 'Europe/Dublin', label: 'Dublin (GMT+1) [Europe/Dublin]' },
+    { value: 'Europe/London', label: 'London (GMT+1) [Europe/London]' },
+    { value: 'Europe/Madrid', label: 'Madrid (GMT+2) [Europe/Madrid]' },
+    { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
+    { value: 'Europe/Oslo', label: 'Oslo (GMT+2) [Europe/Oslo]' },
+    { value: 'Europe/Paris', label: 'Paris (GMT+2) [Europe/Paris]' },
+    { value: 'Europe/Rome', label: 'Rome (GMT+2) [Europe/Rome]' },
+    { value: 'Europe/Stockholm', label: 'Stockholm (GMT+2) [Europe/Stockholm]' },
+    { value: 'Europe/Vienna', label: 'Vienna (GMT+2) [Europe/Vienna]' },
+    { value: 'Europe/Warsaw', label: 'Warsaw (GMT+2) [Europe/Warsaw]' },
+    { value: 'Europe/Zurich', label: 'Zurich (GMT+2) [Europe/Zurich]' },
+    { value: 'Pacific/Auckland', label: 'Auckland (GMT+13) [Pacific/Auckland]' }
   ].sort((a, b) => a.label.localeCompare(b.label));
 
   const handleUseCurrentTime = async () => {
@@ -40,13 +65,12 @@ const TimeZoneConverter = () => {
       const data = await response.json();
       const userTimeZone = data.timezone;
       
-      // Set current time and date based on the fetched timezone
       const now = DateTime.now().setZone(userTimeZone);
       
       setTime(now.toFormat('hh:mm'));
       setDate(now.toFormat('yyyy-MM-dd'));
       setAmPm(now.hour >= 12 ? 'PM' : 'AM');
-      setFromTimezone(userTimeZone); // Make sure this updates the select dropdown
+      setFromTimezone(userTimeZone);
       
       console.log('IP-based timezone:', userTimeZone);
     } catch (error) {
@@ -86,7 +110,6 @@ const TimeZoneConverter = () => {
     setConvertedTimes(convertedResults);
   };
 
-  // Auto-convert when any input changes
   useEffect(() => {
     handleConvert();
   }, [time, date, amPm, fromTimezone, toTimezones]);
