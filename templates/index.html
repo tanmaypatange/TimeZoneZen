@@ -11,13 +11,19 @@
     <div class="container">
         <h1 class="text-center mb-4">Time Zone Converter</h1>
         <div class="timezone-converter">
-            <div class="form-group">
-                <label for="fromTime">Time:</label>
-                <input type="time" id="fromTime" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="fromDate">Date:</label>
-                <input type="date" id="fromDate" class="form-control" required>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="fromTime">Time:</label>
+                        <input type="time" id="fromTime" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="fromDate">Date:</label>
+                        <input type="date" id="fromDate" class="form-control" required>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="fromTimezone">From Time Zone:</label>
@@ -33,8 +39,8 @@
             </div>
             <div class="mt-4">
                 <h3>Converted Time:</h3>
-                <p id="convertedTime"></p>
-                <p id="error" class="text-danger"></p>
+                <p id="convertedTime" class="alert alert-info"></p>
+                <p id="error" class="alert alert-danger"></p>
             </div>
         </div>
     </div>

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify
 import pytz
 from datetime import datetime
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -10,8 +11,20 @@ def index():
 
 @app.route('/timezones')
 def get_timezones():
-    timezones = sorted(pytz.all_timezones)
-    return jsonify(timezones)
+    country_timezones = defaultdict(list)
+    for tz in pytz.all_timezones:
+        try:
+            country = pytz.country_names[tz.split('/')[0]]
+        except KeyError:
+            country = tz.split('/')[0]
+        city = tz.split('/')[-1].replace('_', ' ')
+        country_timezones[country].append(f"{country} ({city}) [{tz}]")
+    
+    formatted_timezones = []
+    for country, timezones in sorted(country_timezones.items()):
+        formatted_timezones.extend(sorted(timezones))
+    
+    return jsonify(formatted_timezones)
 
 @app.route('/convert/<string:from_tz>/<string:to_tz>/<string:datetime_str>')
 def convert_timezone(from_tz, to_tz, datetime_str):

@@ -13,9 +13,12 @@ const errorDisplay = document.getElementById('error');
 fetch('/timezones')
   .then(response => response.json())
   .then(timezones => {
-    const options = timezones.map(tz => `<option value="${tz}">${tz}</option>`).join('');
-    fromTimezoneSelect.innerHTML = options;
-    toTimezoneSelect.innerHTML = options;
+    const options = timezones.map(tz => {
+      const [label, value] = tz.split('[');
+      return `<option value="${value.slice(0, -1)}">${label.trim()} [${value.slice(0, -1)}]</option>`;
+    }).join('');
+    fromTimezoneSelect.innerHTML = `<option value="">Select a time zone</option>${options}`;
+    toTimezoneSelect.innerHTML = `<option value="">Select a time zone</option>${options}`;
   });
 
 // Set current date and time
