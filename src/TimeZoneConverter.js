@@ -58,7 +58,8 @@ const timeZoneOptions = [
 
 const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   const [showMultipleTimezones, setShowMultipleTimezones] = useState(false);
-  const [time, setTime] = useState('');
+  const [hours, setHours] = useState('12');
+  const [minutes, setMinutes] = useState('00');
   const [date, setDate] = useState('');
   const [amPm, setAmPm] = useState('AM');
   const [fromTimezone, setFromTimezone] = useState('');
@@ -73,6 +74,42 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
+  const handleHoursChange = (e) => {
+    let value = parseInt(e.target.value);
+    if (isNaN(value)) value = 12;
+    if (value < 1) value = 12;
+    if (value > 12) value = 1;
+    setHours(value.toString().padStart(2, '0'));
+  };
+
+  const handleMinutesChange = (e) => {
+    let value = parseInt(e.target.value);
+    if (isNaN(value)) value = 0;
+    if (value < 0) value = 59;
+    if (value > 59) value = 0;
+    setMinutes(value.toString().padStart(2, '0'));
+  };
+
+  const handleHoursSpin = (increment) => {
+    let value = parseInt(hours);
+    if (increment) {
+      value = value === 12 ? 1 : value + 1;
+    } else {
+      value = value === 1 ? 12 : value - 1;
+    }
+    setHours(value.toString().padStart(2, '0'));
+  };
+
+  const handleMinutesSpin = (increment) => {
+    let value = parseInt(minutes);
+    if (increment) {
+      value = value === 59 ? 0 : value + 1;
+    } else {
+      value = value === 0 ? 59 : value - 1;
+    }
+    setMinutes(value.toString().padStart(2, '0'));
+  };
+
   useEffect(() => {
     const loadedPairs = localStorage.getItem('savedTimezones');
     if (loadedPairs) {
@@ -85,7 +122,8 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     setFromTimezone(selectedTimezone);
     
     const now = DateTime.now().setZone(selectedTimezone);
-    setTime(now.toFormat('hh:mm'));
+    setHours(now.toFormat('hh'));
+    setMinutes(now.toFormat('mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
     setAmPm(now.hour >= 12 ? 'PM' : 'AM');
   };
@@ -96,7 +134,8 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     setFromTimezone(firstToTimezone);
     
     const now = DateTime.now().setZone(firstToTimezone);
-    setTime(now.toFormat('hh:mm'));
+    setHours(now.toFormat('hh'));
+    setMinutes(now.toFormat('mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
     setAmPm(now.hour >= 12 ? 'PM' : 'AM');
   };
@@ -108,7 +147,8 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
       const userTimeZone = data.timezone;
       
       const now = DateTime.now().setZone(userTimeZone);
-      setTime(now.toFormat('hh:mm'));
+      setHours(now.toFormat('hh'));
+      setMinutes(now.toFormat('mm'));
       setDate(now.toFormat('yyyy-MM-dd'));
       setAmPm(now.hour >= 12 ? 'PM' : 'AM');
       setFromTimezone(userTimeZone);
@@ -158,15 +198,12 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     setFromTimezone(fromZone);
     setToTimezones([toZone]);
     const now = DateTime.now().setZone(fromZone);
-    setTime(now.toFormat('hh:mm'));
+    setHours(now.toFormat('hh'));
+    setMinutes(now.toFormat('mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
     setAmPm(now.hour >= 12 ? 'PM' : 'AM');
     showToast('Time zone pair loaded successfully!', 'success');
   };
-
-  useEffect(() => {
-    handleUseCurrentTime();
-  }, []);
 
   const handleAddMoreZones = () => {
     if (toTimezones.length < 5) {
@@ -176,11 +213,12 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   };
 
   const handleConvert = () => {
-    if (!time || !date || !fromTimezone || !toTimezones[0]) {
+    if (!hours || !minutes || !date || !fromTimezone || !toTimezones[0]) {
       return;
     }
 
-    const now = DateTime.fromFormat(`${time} ${amPm}`, 'hh:mm a', { zone: fromTimezone }).setZone(fromTimezone);
+    const timeString = `${hours}:${minutes} ${amPm}`;
+    const now = DateTime.fromFormat(timeString, 'hh:mm a', { zone: fromTimezone }).setZone(fromTimezone);
     
     const convertedResults = toTimezones.map(zone => {
       if (!zone) return null;
@@ -197,8 +235,12 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   };
 
   useEffect(() => {
+    handleUseCurrentTime();
+  }, []);
+
+  useEffect(() => {
     handleConvert();
-  }, [time, date, amPm, fromTimezone, toTimezones]);
+  }, [hours, minutes, date, amPm, fromTimezone, toTimezones]);
 
   return (
     <div className="container mt-4">
@@ -272,13 +314,45 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
             <div className="col-md-6">
               <label className="form-label">Time</label>
               <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="HH:MM"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                />
+                <div className="input-group-text">
+                  <button 
+                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                    onClick={() => handleHoursSpin(true)}
+                  >▲</button>
+                  <input
+                    type="number"
+                    className="form-control form-control-sm mx-1 text-center"
+                    style={{ width: '3rem' }}
+                    min="1"
+                    max="12"
+                    value={hours}
+                    onChange={handleHoursChange}
+                  />
+                  <button 
+                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                    onClick={() => handleHoursSpin(false)}
+                  >▼</button>
+                </div>
+                <div className="input-group-text">:</div>
+                <div className="input-group-text">
+                  <button 
+                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                    onClick={() => handleMinutesSpin(true)}
+                  >▲</button>
+                  <input
+                    type="number"
+                    className="form-control form-control-sm mx-1 text-center"
+                    style={{ width: '3rem' }}
+                    min="0"
+                    max="59"
+                    value={minutes}
+                    onChange={handleMinutesChange}
+                  />
+                  <button 
+                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                    onClick={() => handleMinutesSpin(false)}
+                  >▼</button>
+                </div>
                 <select 
                   className="form-select" 
                   value={amPm}
@@ -296,6 +370,8 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
                 className="form-control"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                min="1970-01-01"
+                max="2100-12-31"
               />
             </div>
           </div>
