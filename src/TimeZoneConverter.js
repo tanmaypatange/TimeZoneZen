@@ -17,22 +17,7 @@ const timeZoneOptions = [
   { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
   { value: 'Asia/Seoul', label: 'Seoul (GMT+9) [Asia/Seoul]' },
   { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
-  { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' },
-  { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
-  { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
-  { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
-  { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
-  { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
-  { value: 'Europe/Vienna', label: 'Vienna (GMT+2) [Europe/Vienna]' },
-  { value: 'Europe/Brussels', label: 'Brussels (GMT+2) [Europe/Brussels]' },
-  { value: 'America/Sao_Paulo', label: 'São Paulo (GMT-3) [America/Sao_Paulo]' },
-  { value: 'America/Mexico_City', label: 'Mexico City (GMT-5) [America/Mexico_City]' },
-  { value: 'Africa/Cairo', label: 'Cairo (GMT+2) [Africa/Cairo]' },
-  { value: 'Asia/Jakarta', label: 'Jakarta (GMT+7) [Asia/Jakarta]' },
-  { value: 'Pacific/Auckland', label: 'Auckland (GMT+13) [Pacific/Auckland]' },
-  { value: 'Asia/Manila', label: 'Manila (GMT+8) [Asia/Manila]' },
-  { value: 'Asia/Dhaka', label: 'Dhaka (GMT+6) [Asia/Dhaka]' },
-  { value: 'Asia/Tehran', label: 'Tehran (GMT+3:30) [Asia/Tehran]' }
+  { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' }
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 const TimeZoneConverter = () => {
@@ -44,31 +29,32 @@ const TimeZoneConverter = () => {
   const [toTimezones, setToTimezones] = useState(['']);
   const [convertedTimes, setConvertedTimes] = useState([]);
 
+  const handleFromTimezoneChange = (e) => {
+    const selectedTimezone = e.target.value;
+    setFromTimezone(selectedTimezone);
+    
+    // Update time and date based on the selected timezone
+    const now = DateTime.now().setZone(selectedTimezone);
+    setTime(now.toFormat('hh:mm'));
+    setDate(now.toFormat('yyyy-MM-dd'));
+    setAmPm(now.hour >= 12 ? 'PM' : 'AM');
+  };
+
   const handleSwap = () => {
     const firstToTimezone = toTimezones[0];
     setToTimezones([fromTimezone, ...toTimezones.slice(1)]);
     setFromTimezone(firstToTimezone);
   };
 
-  const handleUseCurrentTime = async () => {
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      const data = await response.json();
-      const userTimeZone = data.timezone;
-      
-      const now = DateTime.now().setZone(userTimeZone);
-      
-      setTime(now.toFormat('hh:mm'));
-      setDate(now.toFormat('yyyy-MM-dd'));
-      setAmPm(now.hour >= 12 ? 'PM' : 'AM');
-      setFromTimezone(userTimeZone);
-      
-      console.log('IP-based timezone:', userTimeZone);
-    } catch (error) {
-      console.error('Error fetching timezone:', error);
-      const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      setFromTimezone(browserTimeZone);
-    }
+  const handleUseCurrentTime = () => {
+    const now = DateTime.local();
+    setTime(now.toFormat('hh:mm'));
+    setDate(now.toFormat('yyyy-MM-dd'));
+    setAmPm(now.hour >= 12 ? 'PM' : 'AM');
+    
+    // Try to set the local timezone
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setFromTimezone(browserTimeZone);
   };
 
   useEffect(() => {
@@ -162,7 +148,7 @@ const TimeZoneConverter = () => {
             <select 
               className="form-select"
               value={fromTimezone}
-              onChange={(e) => setFromTimezone(e.target.value)}
+              onChange={handleFromTimezoneChange}
             >
               <option value="">Select a time zone</option>
               {timeZoneOptions.map(tz => (
@@ -214,10 +200,7 @@ const TimeZoneConverter = () => {
                     className="btn btn-outline-danger"
                     onClick={() => {
                       const newZones = toTimezones.filter((_, i) => i !== index);
-                      setToTimezones(newZones);
-                      if (newZones.length === 0) {
-                        setToTimezones(['']);
-                      }
+                      setToTimezones(newZones.length === 0 ? [''] : newZones);
                     }}
                   >
                     Remove
