@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, RotateCcw, Settings2, Sun, Moon } from 'lucide-react';
+import { Clock, RotateCcw, Settings2, Sun, Moon, Star, Trash2 } from 'lucide-react';
 import { DateTime } from 'luxon';
 
 const timeZoneOptions = [
@@ -28,6 +28,16 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   const [fromTimezone, setFromTimezone] = useState('');
   const [toTimezones, setToTimezones] = useState(['']);
   const [convertedTimes, setConvertedTimes] = useState([]);
+  const [savedPairs, setSavedPairs] = useState([]);
+  const [showSavedPairs, setShowSavedPairs] = useState(false);
+
+  useEffect(() => {
+    // Load saved pairs from localStorage
+    const loadedPairs = localStorage.getItem('savedTimezones');
+    if (loadedPairs) {
+      setSavedPairs(JSON.parse(loadedPairs));
+    }
+  }, []);
 
   const handleFromTimezoneChange = (e) => {
     const selectedTimezone = e.target.value;
@@ -68,6 +78,32 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
       const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       setFromTimezone(browserTimeZone);
     }
+  };
+
+  const savePair = (fromZone, toZone) => {
+    const newPair = {
+      from: fromZone,
+      to: toZone,
+      id: Date.now()
+    };
+    const updatedPairs = [...savedPairs, newPair];
+    setSavedPairs(updatedPairs);
+    localStorage.setItem('savedTimezones', JSON.stringify(updatedPairs));
+  };
+
+  const removePair = (pairId) => {
+    const updatedPairs = savedPairs.filter(pair => pair.id !== pairId);
+    setSavedPairs(updatedPairs);
+    localStorage.setItem('savedTimezones', JSON.stringify(updatedPairs));
+  };
+
+  const loadPair = (fromZone, toZone) => {
+    setFromTimezone(fromZone);
+    setToTimezones([toZone]);
+    const now = DateTime.now().setZone(fromZone);
+    setTime(now.toFormat('hh:mm'));
+    setDate(now.toFormat('yyyy-MM-dd'));
+    setAmPm(now.hour >= 12 ? 'PM' : 'AM');
   };
 
   useEffect(() => {
@@ -118,11 +154,52 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
           >
             {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
           </button>
-          <button className="btn btn-outline-secondary rounded-circle">
-            <Settings2 className="w-5 h-5" />
+          <button 
+            className="btn btn-outline-secondary rounded-circle"
+            onClick={() => setShowSavedPairs(!showSavedPairs)}
+            title="Show saved pairs"
+          >
+            <Star className="w-5 h-5" />
           </button>
         </div>
       </div>
+
+      {showSavedPairs && savedPairs.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header">
+            <h3 className="h5 mb-0">Saved City Pairs</h3>
+          </div>
+          <div className="card-body">
+            <div className="row">
+              {savedPairs.map(pair => (
+                <div key={pair.id} className="col-md-6 mb-2">
+                  <div className="d-flex justify-content-between align-items-center border rounded p-2">
+                    <div>
+                      <span>{timeZoneOptions.find(tz => tz.value === pair.from)?.label}</span>
+                      <span className="mx-2">→</span>
+                      <span>{timeZoneOptions.find(tz => tz.value === pair.to)?.label}</span>
+                    </div>
+                    <div>
+                      <button 
+                        className="btn btn-outline-primary btn-sm me-2"
+                        onClick={() => loadPair(pair.from, pair.to)}
+                      >
+                        Load
+                      </button>
+                      <button 
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => removePair(pair.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
@@ -243,14 +320,23 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
                     <p className="h4 mb-1">{result.time}</p>
                     <p className="text-muted small mb-0">{result.date}</p>
                   </div>
-                  <button 
-                    className="btn btn-link"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${result.time} ${result.date}`);
-                    }}
-                  >
-                    Copy
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button 
+                      className="btn btn-link"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${result.time} ${result.date}`);
+                      }}
+                    >
+                      Copy
+                    </button>
+                    <button 
+                      className="btn btn-outline-warning"
+                      onClick={() => savePair(fromTimezone, result.timezone)}
+                      title="Save this pair"
+                    >
+                      <Star className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
