@@ -1,0 +1,21 @@
+body {
+  padding-top: 2rem;
+}
+
+.timezone-converter {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+#convertedTime {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+#error {
+  color: var(--bs-danger);
+}
