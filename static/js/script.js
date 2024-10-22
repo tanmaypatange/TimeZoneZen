@@ -8,6 +8,14 @@ const fromTimezoneSelect = document.getElementById('fromTimezone');
 const toTimezoneSelect = document.getElementById('toTimezone');
 const convertedTimeDisplay = document.getElementById('convertedTime');
 const errorDisplay = document.getElementById('error');
+const useCurrentTimeBtn = document.getElementById('useCurrentTime');
+const conversionProgressBar = document.getElementById('conversionProgress');
+const userLevelDisplay = document.getElementById('userLevel');
+const conversionCountDisplay = document.getElementById('conversionCount');
+
+// Game state
+let conversionCount = 0;
+let userLevel = 1;
 
 // Populate timezone dropdowns
 fetch('/timezones')
@@ -22,9 +30,22 @@ fetch('/timezones')
   });
 
 // Set current date and time
-const now = DateTime.now();
-fromTimeInput.value = now.toFormat('HH:mm');
-fromDateInput.value = now.toFormat('yyyy-MM-dd');
+function setCurrentDateTime() {
+  const now = DateTime.now();
+  fromTimeInput.value = now.toFormat('HH:mm');
+  fromDateInput.value = now.toFormat('yyyy-MM-dd');
+  
+  // Try to set the local timezone
+  const localTimezone = now.zoneName;
+  if (localTimezone) {
+    fromTimezoneSelect.value = localTimezone;
+  }
+}
+
+setCurrentDateTime();
+
+// Use Current Time button
+useCurrentTimeBtn.addEventListener('click', setCurrentDateTime);
 
 // Conversion function
 function convertTime() {
@@ -34,8 +55,7 @@ function convertTime() {
   const toTimezone = toTimezoneSelect.value;
 
   if (!fromTime || !fromDate || !fromTimezone || !toTimezone) {
-    errorDisplay.textContent = 'Please fill in all fields.';
-    convertedTimeDisplay.textContent = '';
+    showError('Please fill in all fields.');
     return;
   }
 
@@ -49,13 +69,44 @@ function convertTime() {
         throw new Error(data.error);
       }
       const result = `${data.converted_time} ${data.abbreviation} (UTC${data.offset})`;
-      convertedTimeDisplay.textContent = result;
-      errorDisplay.textContent = '';
+      showConvertedTime(result);
+      updateGameState();
     })
     .catch(error => {
-      errorDisplay.textContent = `Error: ${error.message}`;
-      convertedTimeDisplay.textContent = '';
+      showError(`Error: ${error.message}`);
     });
+}
+
+function showConvertedTime(result) {
+  convertedTimeDisplay.textContent = result;
+  convertedTimeDisplay.classList.add('fade-in');
+  errorDisplay.classList.add('d-none');
+  setTimeout(() => convertedTimeDisplay.classList.remove('fade-in'), 500);
+}
+
+function showError(message) {
+  errorDisplay.textContent = message;
+  errorDisplay.classList.remove('d-none');
+  errorDisplay.classList.add('slide-in');
+  convertedTimeDisplay.textContent = '';
+  setTimeout(() => errorDisplay.classList.remove('slide-in'), 500);
+}
+
+function updateGameState() {
+  conversionCount++;
+  conversionCountDisplay.textContent = conversionCount;
+  
+  const progress = (conversionCount % 10) * 10;
+  conversionProgressBar.style.width = `${progress}%`;
+  conversionProgressBar.setAttribute('aria-valuenow', progress);
+  conversionProgressBar.textContent = `${progress}%`;
+
+  if (conversionCount % 10 === 0) {
+    userLevel++;
+    userLevelDisplay.textContent = userLevel;
+    userLevelDisplay.classList.add('fade-in');
+    setTimeout(() => userLevelDisplay.classList.remove('fade-in'), 500);
+  }
 }
 
 // Event listeners
@@ -66,3 +117,26 @@ toTimezoneSelect.addEventListener('change', convertTime);
 
 // Initial conversion
 convertTime();
+
+// Autocomplete for timezone dropdowns
+function setupAutocomplete(selectElement) {
+  const datalist = document.createElement('datalist');
+  datalist.id = `${selectElement.id}-list`;
+  selectElement.insertAdjacentElement('afterend', datalist);
+
+  selectElement.setAttribute('list', datalist.id);
+
+  selectElement.addEventListener('input', function() {
+    const value = this.value.toLowerCase();
+    const options = Array.from(this.options).filter(option => 
+      option.text.toLowerCase().includes(value)
+    );
+
+    datalist.innerHTML = options.map(option => 
+      `<option value="${option.value}">${option.text}</option>`
+    ).join('');
+  });
+}
+
+setupAutocomplete(fromTimezoneSelect);
+setupAutocomplete(toTimezoneSelect);
