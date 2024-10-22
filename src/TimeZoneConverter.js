@@ -30,6 +30,12 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   const [convertedTimes, setConvertedTimes] = useState([]);
   const [savedPairs, setSavedPairs] = useState([]);
   const [showSavedPairs, setShowSavedPairs] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   useEffect(() => {
     // Load saved pairs from localStorage
@@ -81,6 +87,21 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   };
 
   const savePair = (fromZone, toZone) => {
+    // Check for duplicates
+    const isDuplicate = savedPairs.some(pair => 
+      pair.from === fromZone && pair.to === toZone
+    );
+    
+    if (isDuplicate) {
+      showToast('This pair is already saved!', 'warning');
+      return;
+    }
+    
+    if (savedPairs.length >= 10) {
+      showToast('Maximum 10 pairs can be saved. Please remove some pairs first.', 'warning');
+      return;
+    }
+    
     const newPair = {
       from: fromZone,
       to: toZone,
@@ -89,12 +110,14 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     const updatedPairs = [...savedPairs, newPair];
     setSavedPairs(updatedPairs);
     localStorage.setItem('savedTimezones', JSON.stringify(updatedPairs));
+    showToast('Time zone pair saved successfully!', 'success');
   };
 
   const removePair = (pairId) => {
     const updatedPairs = savedPairs.filter(pair => pair.id !== pairId);
     setSavedPairs(updatedPairs);
     localStorage.setItem('savedTimezones', JSON.stringify(updatedPairs));
+    showToast('Time zone pair removed successfully!', 'success');
   };
 
   const loadPair = (fromZone, toZone) => {
@@ -104,6 +127,7 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
     setTime(now.toFormat('hh:mm'));
     setDate(now.toFormat('yyyy-MM-dd'));
     setAmPm(now.hour >= 12 ? 'PM' : 'AM');
+    showToast('Time zone pair loaded successfully!', 'success');
   };
 
   useEffect(() => {
@@ -325,6 +349,7 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
                       className="btn btn-link"
                       onClick={() => {
                         navigator.clipboard.writeText(`${result.time} ${result.date}`);
+                        showToast('Time copied to clipboard!', 'success');
                       }}
                     >
                       Copy
@@ -343,6 +368,17 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
           ))}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
+          <div className={`toast show bg-${toast.type === 'success' ? 'success' : 'warning'} text-white`}>
+            <div className="toast-body">
+              {toast.message}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
