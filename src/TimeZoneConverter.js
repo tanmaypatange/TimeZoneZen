@@ -46,15 +46,27 @@ const TimeZoneConverter = () => {
     setFromTimezone(firstToTimezone);
   };
 
-  const handleUseCurrentTime = () => {
-    const now = DateTime.local();
-    setTime(now.toFormat('hh:mm'));
-    setDate(now.toFormat('yyyy-MM-dd'));
-    setAmPm(now.hour >= 12 ? 'PM' : 'AM');
-    
-    // Try to set the local timezone
-    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setFromTimezone(browserTimeZone);
+  const handleUseCurrentTime = async () => {
+    try {
+      // Fetch timezone from IP
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      const userTimeZone = data.timezone;
+      
+      // Set current time and date based on the fetched timezone
+      const now = DateTime.now().setZone(userTimeZone);
+      setTime(now.toFormat('hh:mm'));
+      setDate(now.toFormat('yyyy-MM-dd'));
+      setAmPm(now.hour >= 12 ? 'PM' : 'AM');
+      setFromTimezone(userTimeZone);
+      
+      console.log('IP-based timezone:', userTimeZone);
+    } catch (error) {
+      console.error('Error fetching timezone:', error);
+      // Fallback to browser's timezone if IP geolocation fails
+      const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      setFromTimezone(browserTimeZone);
+    }
   };
 
   useEffect(() => {
