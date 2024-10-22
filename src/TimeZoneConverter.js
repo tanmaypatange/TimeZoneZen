@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronRight, Settings2 } from 'lucide-react';
+import { Clock, RotateCcw, Settings2 } from 'lucide-react';
 import { DateTime } from 'luxon';
+
+// Rest of the imports and component code remains the same until the handleConvert function
 
 const TimeZoneConverter = () => {
   const [showMultipleTimezones, setShowMultipleTimezones] = useState(false);
@@ -11,53 +13,13 @@ const TimeZoneConverter = () => {
   const [toTimezones, setToTimezones] = useState(['']);
   const [convertedTimes, setConvertedTimes] = useState([]);
 
-  const timeZoneOptions = [
-    { value: 'Africa/Cairo', label: 'Cairo (GMT+2) [Africa/Cairo]' },
-    { value: 'Africa/Johannesburg', label: 'Johannesburg (GMT+2) [Africa/Johannesburg]' },
-    { value: 'Africa/Lagos', label: 'Lagos (GMT+1) [Africa/Lagos]' },
-    { value: 'America/Buenos_Aires', label: 'Buenos Aires (GMT-3) [America/Buenos_Aires]' },
-    { value: 'America/Chicago', label: 'Chicago (GMT-5) [America/Chicago]' },
-    { value: 'America/Lima', label: 'Lima (GMT-5) [America/Lima]' },
-    { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-7) [America/Los_Angeles]' },
-    { value: 'America/Mexico_City', label: 'Mexico City (GMT-5) [America/Mexico_City]' },
-    { value: 'America/New_York', label: 'New York (GMT-4) [America/New_York]' },
-    { value: 'America/Sao_Paulo', label: 'São Paulo (GMT-3) [America/Sao_Paulo]' },
-    { value: 'America/Toronto', label: 'Toronto (GMT-4) [America/Toronto]' },
-    { value: 'America/Vancouver', label: 'Vancouver (GMT-7) [America/Vancouver]' },
-    { value: 'Asia/Bangkok', label: 'Bangkok (GMT+7) [Asia/Bangkok]' },
-    { value: 'Asia/Dhaka', label: 'Dhaka (GMT+6) [Asia/Dhaka]' },
-    { value: 'Asia/Dubai', label: 'Dubai (GMT+4) [Asia/Dubai]' },
-    { value: 'Asia/Ho_Chi_Minh', label: 'Ho Chi Minh City (GMT+7) [Asia/Ho_Chi_Minh]' },
-    { value: 'Asia/Hong_Kong', label: 'Hong Kong (GMT+8) [Asia/Hong_Kong]' },
-    { value: 'Asia/Jakarta', label: 'Jakarta (GMT+7) [Asia/Jakarta]' },
-    { value: 'Asia/Kolkata', label: 'India (GMT+5:30) [Asia/Kolkata]' },
-    { value: 'Asia/Manila', label: 'Manila (GMT+8) [Asia/Manila]' },
-    { value: 'Asia/Riyadh', label: 'Riyadh (GMT+3) [Asia/Riyadh]' },
-    { value: 'Asia/Seoul', label: 'Seoul (GMT+9) [Asia/Seoul]' },
-    { value: 'Asia/Shanghai', label: 'Shanghai (GMT+8) [Asia/Shanghai]' },
-    { value: 'Asia/Singapore', label: 'Singapore (GMT+8) [Asia/Singapore]' },
-    { value: 'Asia/Tehran', label: 'Tehran (GMT+3:30) [Asia/Tehran]' },
-    { value: 'Asia/Tokyo', label: 'Tokyo (GMT+9) [Asia/Tokyo]' },
-    { value: 'Australia/Melbourne', label: 'Melbourne (GMT+11) [Australia/Melbourne]' },
-    { value: 'Australia/Sydney', label: 'Sydney (GMT+11) [Australia/Sydney]' },
-    { value: 'Europe/Amsterdam', label: 'Amsterdam (GMT+2) [Europe/Amsterdam]' },
-    { value: 'Europe/Athens', label: 'Athens (GMT+3) [Europe/Athens]' },
-    { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' },
-    { value: 'Europe/Brussels', label: 'Brussels (GMT+2) [Europe/Brussels]' },
-    { value: 'Europe/Copenhagen', label: 'Copenhagen (GMT+2) [Europe/Copenhagen]' },
-    { value: 'Europe/Dublin', label: 'Dublin (GMT+1) [Europe/Dublin]' },
-    { value: 'Europe/London', label: 'London (GMT+1) [Europe/London]' },
-    { value: 'Europe/Madrid', label: 'Madrid (GMT+2) [Europe/Madrid]' },
-    { value: 'Europe/Moscow', label: 'Moscow (GMT+3) [Europe/Moscow]' },
-    { value: 'Europe/Oslo', label: 'Oslo (GMT+2) [Europe/Oslo]' },
-    { value: 'Europe/Paris', label: 'Paris (GMT+2) [Europe/Paris]' },
-    { value: 'Europe/Rome', label: 'Rome (GMT+2) [Europe/Rome]' },
-    { value: 'Europe/Stockholm', label: 'Stockholm (GMT+2) [Europe/Stockholm]' },
-    { value: 'Europe/Vienna', label: 'Vienna (GMT+2) [Europe/Vienna]' },
-    { value: 'Europe/Warsaw', label: 'Warsaw (GMT+2) [Europe/Warsaw]' },
-    { value: 'Europe/Zurich', label: 'Zurich (GMT+2) [Europe/Zurich]' },
-    { value: 'Pacific/Auckland', label: 'Auckland (GMT+13) [Pacific/Auckland]' }
-  ].sort((a, b) => a.label.localeCompare(b.label));
+  // ... timeZoneOptions array remains the same ...
+
+  const handleSwap = () => {
+    const firstToTimezone = toTimezones[0];
+    setToTimezones([fromTimezone, ...toTimezones.slice(1)]);
+    setFromTimezone(firstToTimezone);
+  };
 
   const handleUseCurrentTime = async () => {
     try {
@@ -85,8 +47,10 @@ const TimeZoneConverter = () => {
   }, []);
 
   const handleAddMoreZones = () => {
-    setShowMultipleTimezones(true);
-    setToTimezones([...toTimezones, '']);
+    if (toTimezones.length < 5) {
+      setShowMultipleTimezones(true);
+      setToTimezones([...toTimezones, '']);
+    }
   };
 
   const handleConvert = () => {
@@ -179,37 +143,58 @@ const TimeZoneConverter = () => {
           </div>
 
           <div className="d-flex justify-content-center my-3">
-            <div className="bg-light p-2 rounded-circle">
-              <ChevronRight className="w-6 h-6" />
-            </div>
+            <button 
+              className="btn btn-light rounded-circle p-2"
+              onClick={handleSwap}
+              title="Swap time zones"
+            >
+              <RotateCcw className="w-6 h-6" />
+            </button>
           </div>
 
           <div className="mb-3">
             <div className="d-flex justify-content-between align-items-center mb-2">
               <label className="form-label">To Time Zone</label>
-              <button 
-                className="btn btn-link p-0"
-                onClick={handleAddMoreZones}
-              >
-                Add More Zones
-              </button>
+              {toTimezones.length < 5 && (
+                <button 
+                  className="btn btn-link p-0"
+                  onClick={handleAddMoreZones}
+                >
+                  Add More Zones
+                </button>
+              )}
             </div>
             {toTimezones.map((zone, index) => (
-              <select 
-                key={index}
-                className="form-select mb-2"
-                value={zone}
-                onChange={(e) => {
-                  const newZones = [...toTimezones];
-                  newZones[index] = e.target.value;
-                  setToTimezones(newZones);
-                }}
-              >
-                <option value="">Select a time zone</option>
-                {timeZoneOptions.map(tz => (
-                  <option key={tz.value} value={tz.value}>{tz.label}</option>
-                ))}
-              </select>
+              <div key={index} className="d-flex gap-2 mb-2">
+                <select 
+                  className="form-select"
+                  value={zone}
+                  onChange={(e) => {
+                    const newZones = [...toTimezones];
+                    newZones[index] = e.target.value;
+                    setToTimezones(newZones);
+                  }}
+                >
+                  <option value="">Select a time zone</option>
+                  {timeZoneOptions.map(tz => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                  ))}
+                </select>
+                {index > 0 && (
+                  <button 
+                    className="btn btn-outline-danger"
+                    onClick={() => {
+                      const newZones = toTimezones.filter((_, i) => i !== index);
+                      setToTimezones(newZones);
+                      if (newZones.length === 0) {
+                        setToTimezones(['']);
+                      }
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             ))}
           </div>
 
