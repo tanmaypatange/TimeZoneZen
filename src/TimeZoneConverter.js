@@ -23,22 +23,31 @@ const TimeZoneConverter = () => {
     { value: 'Europe/Berlin', label: 'Berlin (GMT+2) [Europe/Berlin]' }
   ];
 
-  useEffect(() => {
-    // Set current date on component mount
-    const now = new Date();
-    setDate(now.toISOString().split('T')[0]);
-  }, []);
-
   const handleUseCurrentTime = () => {
     const now = new Date();
-    setTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+    
+    // Set current time
+    setTime(now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    }));
+    
+    // Set current date - ensure this is set in the correct format for the date input
     setDate(now.toISOString().split('T')[0]);
+    
+    // Set AM/PM
     setAmPm(now.getHours() >= 12 ? 'PM' : 'AM');
     
     // Automatically detect and set user's time zone
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setFromTimezone(userTimeZone);
   };
+
+  // Call handleUseCurrentTime when component mounts
+  useEffect(() => {
+    handleUseCurrentTime();
+  }, []);
 
   const handleAddMoreZones = () => {
     setShowMultipleTimezones(true);
@@ -112,7 +121,6 @@ const TimeZoneConverter = () => {
               value={fromTimezone}
               onChange={(e) => setFromTimezone(e.target.value)}
             >
-              <option value="">Select a time zone</option>
               {timeZoneOptions.map(tz => (
                 <option key={tz.value} value={tz.value}>{tz.label}</option>
               ))}
