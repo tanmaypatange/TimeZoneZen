@@ -68,17 +68,17 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
   const [showSavedPairs, setShowSavedPairs] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
-  };
-
   useEffect(() => {
     const loadedPairs = localStorage.getItem('savedTimezones');
     if (loadedPairs) {
       setSavedPairs(JSON.parse(loadedPairs));
     }
   }, []);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   const handleFromTimezoneChange = (e) => {
     const selectedTimezone = e.target.value;
@@ -180,12 +180,16 @@ const TimeZoneConverter = ({ theme, onThemeToggle }) => {
       return;
     }
 
-    const now = DateTime.fromFormat(`${time} ${amPm}`, 'hh:mm a', { zone: fromTimezone }).setZone(fromTimezone);
+    const [hours, minutes] = time.split(':').map(Number);
+    const adjustedHours = amPm === 'PM' && hours !== 12 ? hours + 12 : (amPm === 'AM' && hours === 12 ? 0 : hours);
+    
+    const dateTimeStr = `${date}T${String(adjustedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+    const sourceDateTime = DateTime.fromISO(dateTimeStr, { zone: fromTimezone });
     
     const convertedResults = toTimezones.map(zone => {
       if (!zone) return null;
       
-      const converted = now.setZone(zone);
+      const converted = sourceDateTime.setZone(zone);
       return {
         timezone: zone,
         time: converted.toFormat('hh:mm a'),
