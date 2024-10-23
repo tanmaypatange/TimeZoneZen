@@ -19,6 +19,10 @@ args = "Time Zone Converter"
 task = "workflow.run"
 args = "React App"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "React Production Server"
+
 [[workflows.workflow]]
 name = "Time Zone Converter"
 author = "agent"
@@ -43,8 +47,22 @@ task = "shell.exec"
 args = "npm start"
 waitForPort = 3000
 
+[[workflows.workflow]]
+name = "React Production Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build && npm run serve"
+waitForPort = 3000
+
 [deployment]
-run = ["sh", "-c", "python main.py"]
+deploymentTarget = "static"
+publicDir = "public"
+run = ["sh", "-c", "npm run build && npm run serve"]
 
 [[ports]]
 localPort = 3000
